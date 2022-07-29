@@ -1,0 +1,250 @@
+\documentclass{beamer}
+\usepackage{multicol}
+%\usetheme{metropolis}
+%\usepackage{appendixnumberbeamer}
+
+%\usepackage{booktabs}
+%\usepackage[scale=2]{ccicons}
+
+%\usepackage{pgfplots}
+%\usepgfplotslibrary{dateplot}
+
+%\usepackage{xspace}
+%\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+%\documentclass[handout]{beamer}
+%\usepackage{pgfpages}
+%\pgfpagesuselayout{4 on 1}[a4paper,border shrink=5mm,landscape]
+\usetheme[progressbar=frametitle]{metropolis}
+%\setbeamertemplate{frame numbering}{fraction}
+\useoutertheme{metropolis}
+\useinnertheme{metropolis}
+\usefonttheme{metropolis}
+\usecolortheme{spruce}
+\setbeamercolor{background canvas}{bg=white}
+%\usetheme{Warsaw}
+\definecolor{mygreen}{rgb}{.125,1.0,.25}
+\usecolortheme[named=mygreen]{structure}
+%%\usecolortheme{crane}
+%\useinnertheme{rectangles}
+%\useoutertheme{tree}
+%\usefonttheme{serif}
+
+
+\title{Understanding Liposome Flux Assays in the context of Sodium voltage-gated channels}
+\subtitle{my first beamer tutorial}
+\author{Tingwei Adeck}
+\institute{West Texas A \& M University}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\label{contents}
+\frametitle{Outline}
+\tableofcontents
+\end{frame}
+
+\section{Section 1}
+\subsection{sub a}
+
+\begin{frame}
+\label{movies}
+\frametitle{Best Movies 2019}
+\begin{itemize}
+\item Avengers Endgame
+\pause
+\item Dark Phoenix
+\pause
+\item Spider Man into the Spider Verse
+\pause
+\item Escape Plan
+\pause
+\item Will remember more
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\label{codes}
+\frametitle{Including Code}
+\begin{semiverbatim}
+\\begin\{frame\}
+\\frametitle\{Outline\}
+\\tableofcontents
+\\end\{frame\}
+\end{semiverbatim}
+\end{frame}
+
+\begin{frame}
+\frametitle{Title}
+Lorem ipsum bs
+\end{frame}
+
+\subsection{sub b}
+\begin{frame}
+\frametitle{Using Columns}
+\begin{columns}
+\column{0.5\textwidth}
+Lorem ipsum bs
+\column{0.5\textwidth}
+\centering
+\includegraphics[scale=0.2]{cover.jpg}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Pictures}
+\begin{figure}
+\includegraphics[scale=0.4]{cover.jpg}
+\caption{Typewriting in Java Source}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descriptions}
+\begin{description}
+\item[API] Application Programming Interface
+\item[LAN] Local Area Network
+\item[ASCI] American Standard Code for Information Interchange
+\end{description}
+\end{frame}
+
+\setbeamercovered{invisible}
+\begin{frame}
+\frametitle{Tables}
+\begin{table}
+\begin{tabular}{l | c | c | c | c }
+Competitor Name & Swim & Cycle & Run & Total \\
+\hline \hline
+John T & 13:04 & 24:15 & 18:34 & 55:53 \onslide<2->\\ 
+Norman P & 8:00 & 22:45 & 23:02 & 53:47 \onslide<3->\\
+Alex K & 14:00 & 28:00 & n/a & n/a \onslide<4->\\ 
+Sarah H & 9:22 & 21:10 & 24:03 & 54:35 
+\end{tabular}
+\caption{Triathlon Results}
+\end{table}
+\end{frame}
+
+\begin{frame}
+\frametitle{Blocks}
+\begin{block}{Block Title}
+Getting used to the feeling
+\end{block}
+\begin{alertblock}{Block Title}
+Getting used to something new and warning signs
+\end{alertblock}
+\end{frame}
+
+\begin{frame}
+\frametitle{More Blocks}
+\begin{definition}
+A prime number is a number with only one factor and itself.
+\end{definition}
+\begin{example}
+A prime number example is 2.
+\end{example}
+\end{frame}
+
+\begin{frame}
+\frametitle{Math Blocks}
+\begin{theorem}<1->{Pythagoras}
+$ a^2 + b^2 = c^2$
+\end{theorem}
+\begin{corollary}<3->
+$ x + y = y + x  $
+\end{corollary}
+\begin{proof}<2->
+$\omega +\phi = \epsilon $
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{buttons}
+\hyperlink{contents}{\beamerbutton{Contents Page}}
+
+\hyperlink{codes}{\beamergotobutton{Codes}}
+
+\hyperlink{movies}{\beamerskipbutton{Movies}}
+
+\hyperlink{movies}{\beamerreturnbutton{Movies}}
+\end{frame}
+
+\begin{frame}
+\frametitle{Overlays}\vspace{2pt}
+\onslide<1->{first line of text}
+
+\onslide<2->{second line of text}
+
+\onslide<3->{third line of text}
+\end{frame}
+
+\setbeamercovered{transparent}
+\begin{frame}
+\frametitle{Overlays}
+\uncover<1->{first line of text}
+
+\uncover<2->{second line of text}
+
+\uncover<3->{third line of text}
+\end{frame}
+
+\begin{frame}
+\frametitle{compatible commands}
+\textbf<2>{example text}
+
+\textsl<3>{example text}
+
+\textit<4>{example text}
+
+\textrm<5>{example text}
+
+\textsf<6>{example text}
+
+\textcolor<7>{orange}{example text}
+
+\alert<8>{example text}
+
+\structure<9>{example text}
+\end{frame}
+
+\begin{frame}[t]{Title of the slide}\vspace{0.5pt}
+\begin{enumerate}
+\item fuck you bammel
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[t]{Functions}\vspace{4pt}
+\begin{block}{Definition of a Function}
+\vspace{0.5em}
+A \textbf{function} is $f$ is a rule that assigns to each element $x$ in a set $D$ exactly one element, called $f(x)$, in a set $E$.
+\vspace{0.5em}
+\end{block}
+
+\vspace{10pt}
+Set $D$ is callde the 
+\only<1>{\line(1,0){50}}
+\only<2>{\textcolor{magenta}{domain}}
+\,of the function $E$.\\[10pt]
+
+\end{frame}
+
+\begin{frame}[t]{Multicol practice}\vspace{4pt}
+you should be able to identify these by name
+\begin{enumerate}
+\begin{multicols}{3}
+\item $y=x$
+\item $y=|x|$
+\item $y=x^2$
+\item $y=x^3$
+\item $y=\sqrt{x}$
+\item $y=\sqrt[3]{x}$
+\item $y=\frac{1}{x}$
+\end{multicols}
+\end{enumerate}
+
+\end{frame}
+
+\end{document}
