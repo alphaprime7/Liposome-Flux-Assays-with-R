@@ -1,0 +1,474 @@
+\documentclass[11pt]{beamer}
+\beamertemplatenavigationsymbolsempty 
+\usetheme{Madrid}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,mathtools}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{wasysym}
+\usepackage{bm} %bold math
+
+\setbeamertemplate{itemize items}[default]
+\setbeamertemplate{enumerate items}[default]
+
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\bb}[1]{\mathbb{#1}}
+\newcommand{\E}{\mathbb{E}}
+\DeclareMathOperator*{\C}{Cov}
+\DeclareMathOperator*{\indp}{\perp\!\!\!\perp}
+\newcommand{\V}{{\text{Var}}}
+
+
+\title{BIOL 540 \\ Boss Man}
+\author{Tingwei Adeck and Amina Suleiman}
+\date{October 15, 2019}
+%\title{}
+%\setbeamercovered{transparent} 
+%\setbeamertemplate{navigation symbols}{} 
+%\logo{} 
+%\institute{} 
+%\date{} 
+%\subject{} 
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%\begin{frame}
+%\tableofcontents
+%\end{frame}
+
+\begin{frame}{Road Map}
+
+\vspace{3mm}
+\begin{enumerate}
+\item Midterm Review
+\begin{enumerate}
+\item Small groups present Qs 1-4
+\end{enumerate}
+\item Homework Review
+\item Matrix Regression
+\begin{enumerate}
+\item Motivation
+\item Matrix Properties
+\item Matrix Derivations
+\end{enumerate}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}{Homework Review}
+
+\begin{enumerate}
+\item Just saying that there might be omitted variables is meaningless, give a substantive example. Imagine you are at a workshop and giving a comment. 
+\item When are we concerned about omitted variables affectng our causal interpretation? Is party/religiosity an omitted variable when estimating the causal effect of ngirls on AAUW score after including totchi?
+\item Is R dropping experience from the regression wages $\sim$ age + education + experience because it is highly correlated (.95) with the other IVs? 
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}{Motivating the Matrix Approach}
+
+Why are we introducing this new language? 
+
+Compare bivariate regression with a simple multivariate regression.  
+
+$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 $$
+$$\hat{\beta}_1 = \frac{\C(X_1, Y)}{\V(X_1)}$$
+
+This is pretty managable, but then add even just one more variable
+
+$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2$$
+$$\hat{\beta}_1 = \frac{\C(X_1, Y)\textcolor{blue}{\V(X_2) - \C(X_2, Y)\C(X_1, X_2)}}{\V(X_1)\textcolor{blue}{\V(X_2) - \C(X_1, X_2)^2}}$$
+
+Calculating all of these quantities is tedious and this is still a very simple case. You could easily include 10 additional variables in your research. 
+
+\end{frame}
+
+\begin{frame}{Motivating the Matrix Approach}
+
+Using matrices, we can calculate all of our coefficients at once using
+
+$$\hat{\bm{\beta}}=(\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{Y}$$
+
+Calculating our parameters for statistical inference is just as easy. 
+
+\begin{itemize}
+\item We need the variance-covariance matrix for the coefficients
+$$Var[\hat{\bm{\beta}}]=(\sigma^{2}\mathbf{I})(\mathbf{X}^{T}\mathbf{X})^{-1}$$
+{\centering \texttt{vcov(lm)}\par}
+\item Calculate $\sigma^{2}$ just as before. 
+$$\hat{\sigma}^{2} = \frac{SSR}{n-(k+1}=\frac{\hat{u}^{T}\hat{u}}{n-(k+1)}$$
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{Matrix Properties}
+
+Let's review some basic matrix concepts
+
+\begin{enumerate}
+\item What is the difference between a scalar, a vector, and a matrix?
+\item What is the identity matrix?
+\item What is a square matrix?
+\item What are the rules for the addition and subtraction of matrices, and when can we carry out this operation?
+\item What is the operation for transposition?
+\item What is the operation for scalar mulplication? 
+\item What are the dimensions of $\mathbf{X}$? What about $\mathbf{X^{T}X}$?
+\end{enumerate}
+\end{frame}
+
+{
+\setbeamercolor{background canvas}{bg=}
+%\include pdf[pages=32-33]{/Users/Vincent/Dropbox/fall2016/lectures/lec61.pdf}
+}
+
+\begin{frame}{Matrix Multiplication Properties}
+
+\begin{itemize}
+\item Matrix multiplication is \textcolor{blue}{associative} and \textcolor{blue}{distributive}
+$$(\bm{AB})\bm{C} = \bm{A}(\bm{BC}) \text{ and } \bm{A(B+C)= AB + AC}$$
+\item But it is not \textcolor{blue}{commutative}, order \textbf{matters}
+$$\bm{AB \neq BA}$$
+\item Transposition also distributes
+$$\bm{(AB)^{T} = B^{T}A^{T}} \text{ and } \bm{(A + B)^{T} = A^{T} + B^{T}}$$ 
+\item Multiplication with the inverse equals the identity matrix
+$$\bm{A^{-1}A = I}$$
+\item The identity  matrix is \textcolor{blue}{commutative, associative, and distributive}
+$$\bm{AIB = IAB = ABI = AB}$$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Matrix Multiplication in R}
+\footnotesize
+<<>>=
+a <- matrix(c(1,4,3,2), ncol=2); a
+b <- matrix(c(1,8, 9, 4), ncol=2); b
+
+a + b
+@
+
+\end{frame}
+
+\begin{frame}[fragile]{Matrix Multiplication in R}
+\footnotesize
+
+\begin{columns}
+\begin{column}{0.45\textwidth}
+<<>>=
+a
+b
+@
+\end{column}
+
+\vrule{}
+
+\begin{column}{0.45\textwidth}
+
+<<>>=
+a[1,] * b[,1] 
+sum(a[1,] * b[,1] )
+a %*% b
+
+@
+
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Matrix Multiplication in R}
+\footnotesize
+
+\begin{columns}
+\begin{column}{0.45\textwidth}
+<<>>=
+a %*% b
+
+@
+\end{column}
+
+\vrule{}
+
+\begin{column}{0.45\textwidth}
+<<>>=
+sum(a[1,] * b[,1] )
+sum(a[1,] * b[,2] )
+sum(a[2,] * b[,1] )
+sum(a[2,] * b[,2] )
+@
+
+
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]{Matrix Inversion}
+
+In practice you will ask \texttt{R} to invert matrices for you. 
+\footnotesize
+<<>>=
+a
+solve(a)
+@
+\normalsize
+
+But what is R doing?
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+We can compute the inverse of a 2x2 matrix by hand. 
+
+\[
+\mathbf{A} = 
+\begin{bmatrix}
+   a & b\\
+   c & d
+\end{bmatrix}
+\text{, then }
+\mathbf{A^{-1}} = 
+\dfrac{1}{a \cdot d - b \cdot c}
+\begin{bmatrix}
+   d & -b\\
+   -c & a
+\end{bmatrix}
+\]
+\vspace{5mm}
+\[
+\mathbf{A} = 
+\begin{bmatrix}
+   1 & 3\\
+   4 & 2
+\end{bmatrix}
+\text{, then }
+\mathbf{A^{-1}} = 
+\dfrac{1}{1 \cdot 2 - 3 \cdot 4}
+\begin{bmatrix}
+   2 & -3\\
+   -4 & 1
+\end{bmatrix}
+\]
+
+\[
+\dfrac{-1}{10}
+\begin{bmatrix}
+   2 & -3\\
+   -4 & 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+   -.2 & .3\\
+   .4 & -.1
+\end{bmatrix}
+\]
+\\~\\
+
+Note: the quantity $\frac{1}{a \cdot d - b \cdot c}$ is called the \textcolor{blue}{determinant}. \\~\\
+  
+But once matrices get bigger than this the computation is much harder. R is probably using a fancy algorithm instead of the rule we used. 
+\end{frame}
+
+\begin{frame}{Matrix Application Toy Example}
+
+Lets say we had receipts from a job-talk dinner where grad students and faculty went to a restaurant with drinks and food. There are two drink options, whiskey and wine, and two food options, burgers and fish. \\
+\vspace{3mm}
+
+We want to know how many students and how many faculty went to the dinner. Our receipts only tell us the total amount spent on drinks (220) and on food (260). We check their menu online and learn that the prices are, respectively, 8,6,8,10. We know from qualitative case studies that all students order whiskey and burgers and that all faculty order wine and fish. \\
+\vspace{3mm}
+
+This sets up the following equations
+
+$$x*8 + y*6 = 220$$
+$$x*8 + y*10 = 260$$
+
+There are two (independent) equations and two unknowns, so we can solve this system. 
+\end{frame}
+
+\begin{frame}
+
+We could solve this system by plugging one equation into the other 
+
+\begin{align*}
+\intertext{First, rearrange the second equation}
+260 - y*10 & = x * 8
+\intertext{Plug this into the first}
+260 - y*10 + y*6 &= 220
+\intertext{Solve for $y$}
+y & = 10
+\intertext{Plug back in}
+x*8 + 10*6 &= 220 \\
+x*8 + 60 &= 220 \\
+x*8 &= 160 \\
+x &= 20
+\end{align*}
+
+\end{frame}
+\begin{frame}
+
+But we can also solve it with matrices. Here's our rewritten system.  
+
+\[
+\begin{bmatrix}
+   x & y 
+\end{bmatrix}
+\cdot 
+\begin{bmatrix}
+   5 & 8\\
+   6 & 10
+\end{bmatrix}
+=
+\begin{bmatrix}
+   220 \\
+   260
+\end{bmatrix}
+\]
+
+Now isolate the quantities of interest
+\[
+\begin{bmatrix}
+   x & y 
+\end{bmatrix}
+=
+\begin{bmatrix}
+   5 & 8\\
+   6 & 10
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+   220 \\
+   260
+\end{bmatrix}
+\]
+
+Take the inverse (determinant = .5)
+\[
+\begin{bmatrix}
+   x & y 
+\end{bmatrix}
+=
+\begin{bmatrix}
+   5 & -4\\
+   -3 & 2.5
+\end{bmatrix}
+\begin{bmatrix}
+   220 \\
+   260
+\end{bmatrix}
+\]
+
+Matrix multiply
+
+\[
+\begin{bmatrix}
+   x & y 
+\end{bmatrix}
+=
+\begin{bmatrix}
+   5 \cdot 220 - 4 \cdot 260 \\
+   - 3 \cdot 220 + 2.5 \cdot 260
+\end{bmatrix}
+=
+\begin{bmatrix}
+   20 \\
+   10
+\end{bmatrix}
+\]
+
+\end{frame}
+ 
+ \begin{frame}{Derivation of OLS}
+ \begin{align*}
+S(\bm{\beta, X, y}) & = \bm{\hat{u}^{T}\hat{u}} = SRR \text{,  we want to minimize this}\\
+& = \bm{(y - X\beta)^{T}(y - X\beta)}
+\intertext{Apply the transpose rule twice}
+& = \bm{(y^{T} - \beta^{T}X^{T})(y - X\beta)}
+\intertext{Distribute, making sure to keep the order the same}
+& = \bm{y^{T} y - \beta^{T} X^{T} y  - y^{T} X \beta + \beta^{T} X^{T} X \beta}
+\intertext{Notice $\bm{\beta^{T}X^{T}y}$ is a (1 x k)(k x n)(n x 1) = (1x1) matrix so $\bm{A=A^{T}}$}
+& = \bm{y^{T} y - y^{T}(X \beta) - y^{T} X \beta + \beta^{T} X^{T} X \beta}\\
+& = \bm{y^{T} y - 2 y^{T}(X \beta) + \beta^{T} X^{T} X \beta}
+ \end{align*}
+ 
+ \end{frame}
+ 
+ \begin{frame}
+
+Some quick definitions before we continue\\~\\
+\begin{enumerate}
+\item Derivatives work almost exactly the same for matrices. 
+$$\bm{y = X \beta} + c \text{, then } \dfrac{d\bm{y}}{d\bm{X}} = \bm{\beta}^{T} $$
+
+Notice the transpose. 
+\item We call the column vector (k x 1) of partial derivatives the \textcolor{blue}{gradient}
+\[ \dfrac{d\bm{y}}{d\bm{X}} = 
+\begin{bmatrix}
+   dy/d X_{1} = \beta_{1}\\
+   dy/d X_{2} = \beta_{2}\\
+\cdots\\
+   dy/d X_{k} = \beta_{k} 
+\end{bmatrix}
+\]
+Note that these are \textcolor{blue}{columns} of $\bm{X}$, not rows of $\bm{X}$. 
+
+\item We call the matrix (k x k) of 2nd-order partial derivatives the \textcolor{blue}{Hessian}
+
+\item Squares are also basically the same
+$$\dfrac{dy}{dA} \text{ } \bm{A^{T}A}= \bm{2A} \text{, and , } \dfrac{dy}{dA} \text{ } \bm{A^{T}XA}= \bm{2XA}$$
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\begin{align*}
+\textcolor{gray}{S(\bm{\beta, X, y}) } & \textcolor{gray}{= \bm{y^{T} y - 2 y^{T}(X \beta) + \beta^{T} X^{T} X \beta}}\\
+\dfrac{d S(\bm{\beta, X, y})}{d \bm{\beta}} & = \bm{- 2 X^{T}y + 2 X^{T} X \beta}
+\intertext{Set equal to zero}
+0 & = \bm{- 2 X^{T}y + 2 X^{T} X \tilde{\beta}}\\
+\bm{2 X^{T} X \tilde{\beta}} & = \bm{2 X^{T}y} \\
+\intertext{Multiply by the inverse, making sure to keep the order consistent}
+\bm{(X^{T} X)^{-1}(X^{T} X )\tilde{\beta}} & = \bm{(X^{T} X)^{-1}(X^{T}y)} \\
+\bm{ I \tilde{\beta}} & = \bm{(X^{T} X)^{-1}(X^{T}y)}
+\end{align*}
+\end{frame}
+ 
+ 
+ \begin{frame}{Unbiasedness of $\hat{\beta}$}
+ \begin{align*}
+\hat{\beta} &= (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{y}\\
+&=  (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}(\mathbf{X}\beta + \mathbf{u})\\
+&=  \textcolor{blue}{(\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{X}}\beta + (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{u})\\
+&= I \beta + (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{u}\\
+E[\hat{\beta}|\mathbf{X}] &= \beta +  (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}E[\mathbf{u}|\mathbf{X}]\\
+&= \beta\\
+E[E[\hat{\beta}|\mathbf{X}]] & = E[\beta] = \beta
+\end{align*}
+ \end{frame}
+ 
+ 
+ \begin{frame}{Variance of $\hat{\beta}$}
+ 
+\begin{align*}
+V[\hat{\beta}|\mathbf{X}] &= V[\beta|\mathbf{X}] + V[ (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{u}|\mathbf{X}]\\
+ &= 0 + V[ (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{u}|\mathbf{X}]\\
+&= (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T} \textcolor{blue}{V[\mathbf{u}|\mathbf{X}]} \textcolor{red}{( (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T})^{T}}\\
+& = (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T} \textcolor{blue}{V[\mathbf{u}|\mathbf{X}]}\textcolor{red}{\mathbf{X}(\mathbf{X}^{T}\mathbf{X})^{-1}}\\
+& = (\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T} \textcolor{blue}{\sigma^{2}\mathbf{I}}\mathbf{X}(\mathbf{X}^{T}\mathbf{X})^{-1}\\
+& = \textcolor{blue}{\sigma^{2}\mathbf{I}} \textcolor{red}{(\mathbf{X}^{T}\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{X}}(\mathbf{X}^{T}\mathbf{X})^{-1}\\
+& = \sigma^{2}(\mathbf{X}^{T}\mathbf{X})^{-1}
+\end{align*}
+
+This yields a (k x k) variance-covariance matrix for $\hat\beta$ (including intercept in k). \\~\\
+
+Calculate $\sigma^{2}$ with $\dfrac{SSR}{n-k} = \dfrac{\hat{u}^{T}\hat{u}}{n-k}$.  
+
+ \end{frame}
+ 
+\end{document}
