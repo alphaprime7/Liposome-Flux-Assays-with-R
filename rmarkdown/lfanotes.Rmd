@@ -1,0 +1,241 @@
+---
+title: "Liposome Flux Assays in the Context of NavAb meet R"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+---
+
+## Motivation
+
+- The difficulty of using the FLUOstar plate reader is analysis of data.
+- The lab involved utilized MATLAB for conversion of a .DAT file into a csv file with normalized data for further analysis.
+- The main issue is clearance for the MATLAB program resided with the post-doc (not important to me anymore) and the professor (also in my mental black hole), leaving me with the task of analyzing the data.
+- Moreover, any differences in the lab procedure entailed recycling the code to accommodate for example loading samples vertically vs horizontally.
+- Finally, importing .DBF files into Excel was not possible as data was imported in a distorted manner. 
+- The only solution was to develop R code to implement analysis of data using the .DBF output as opposed to the .DAT output.
+- While the concern of recycling code wasn't really mine, I was also ambitious to see if I could achieve recursive code without needing to rewrite code if lab personnel performed the same task differently.
+- As will be seen recursion was not achieved although still a work in progress but so far it seems my solution might lie within shiny apps after some clean up of the transformed .DBF file.
+
+## Importing Cleaned Data Sets into R
+- The procedure for cleaning up the data sets will be provided in jupyter notebook as Rmarkdown seems to force organization and as said earlier, this is not my most sophisticated work.
+```{r}
+#import my principal data set
+navab227_norm2 <- read.csv(file = 'navab227_norm3.csv', header = T)
+navab221_avgnorm <- read.csv(file = 'navab221_norm3.csv', header = T)
+head(navab227_norm2)
+head(navab221_avgnorm)
+```
+## Visualization of Fluorescence
+
+- A plot of average normalized fluorescence (y) vs Cycle No (a proxy for time) in normal or signal conditions.
+- There is some biology behind this plot and this can only be understood by comparing conditions were potassium NOT Cesium is placed within the liposome.
+- The biophysics might be a lot to take in but basically, we cant make sense of the data without comparisons. 
+
+### Plot Fluorescence vs Time proxy using base R
+```{r}
+## Create an R Graphics Device or container for plots
+windows(width = 4.5, height = 4)
+opar <- par(no.readonly = TRUE)
+#par(mar = c(5, 5, 4, 6))
+par(mar = c(4, 4, 3, 5))
+
+plot.signal1 <- function(x){
+  plot(E2norm ~ WELLNUM, data = navab227_norm2, type = "o", frame = T, 
+       pch = 1, col = 3, lwd = 2, xlim = c(1,40), main = "NavAb Liposome Flux Assay", 
+       xlab = "Cycle No", ylab = "Average Normalized Fluorescence")
+  # Add a second line
+  lines(F2norm ~ WELLNUM, data = navab227_norm2, pch = 2, col = 4, 
+        type = "o", lty = 2, lwd = 2)
+  #lines(f6smooth ~ Time, data = navablfa_norm, pch = 2, col = 4, type = "o", lty = 2, lwd = 2)
+  
+  # Add a third line
+  lines(G2norm ~ WELLNUM, data = navab227_norm2, pch = 7, col = "red", 
+        type = "o", lty = 2, lwd = 2)
+  #lines(g6smooth ~ Time, data = navablfa_norm, pch = 7, col = "red", type = "o", lty = 2, lwd = 2)
+  
+  legend("topright", inset = c(0.0, 0), legend=c("Test", "NC","PC"), 
+         title = "2uM ACMA (Cs inside)", title.col = "black", box.lwd = 1, 
+         box.col = "orange", col=c(3,4,"red"), lty = 1:2, lwd = 3, 
+         cex=0.7, xpd = T)
+}
+
+# call function (it works but output is on an external window)
+#images are attached to show the comparison explained
+plot.signal1()
+```
+
+### Plot using plotly (more interactive)
+```{r}
+# An alternate approach. The pitfalls sometimes of R base.It seems 
+#plotly is a part of python de facto. It is more interactive
+#Note Cs inside
+library(plotly)
+library(tidyr)
+library(plyr)
+
+plotly.fun<- function(a){
+  fig1 <- plot_ly(navab227_norm2, x = ~WELLNUM, y = ~E2norm, 
+                  type = 'scatter', mode = 'line', name = 'Test')
+  fig1 <- fig1 %>% add_trace(y = ~F2norm, name = 'Negative Control')
+  fig1 <- fig1 %>% add_trace(y = ~G2norm, name = 'Positive Control')
+  fig1
+  fig1 %>% layout(yaxis = list(range=c(-0.8,0), 
+           title = 'Log Normalized Fluorescence'),title = 'NavAb Liposome Flux Assay')
+  
+} 
+
+#Call out the function
+plotly.fun()
+
+```
+
+- Images to explain the difference between K inside vs Cs inside the liposome
+```{r}
+# Plot in signal zone for Cs inside
+library(ggplot2)
+library(ggdark)
+library(ggthemes)
+p1 = ggplot(navab227_norm2, aes(x=WELLNUM)) + 
+  geom_point(aes(y=E2norm), size=3, color="blue") +
+  geom_point(aes(y=F2norm), size=3, color="red") +
+  geom_point(aes(y=G2norm), size=3, color="green") +
+  geom_line(aes(y=E2norm, color='Test'), size=0.8) + 
+  geom_line(aes(y=F2norm, color='Negative Control'), size =0.8) + 
+  geom_line(aes(y=G2norm, color='Positive Control'), size =0.8) + 
+  dark_mode()+
+  xlim(0,20) +
+  ylim(0,1) +
+  labs(title = 'NavAb Liposome Flux Assay (2uM ACMA)', 
+       x = 'Time(s)', y='Avg Normalized Fluorescence', color='2uM ACMA (Cs Inside)')
+
+# call plot
+p1 #or print(p1)
+```
+
+```{r}
+#Plot in signal zone for K inside
+#E,N,P = exp,neg and pos respectively
+#Ensure to take notes, i was working for hours and had no idea
+#why i called them this
+p2 = ggplot(navab221_avgnorm, aes(x=WELLNUM)) + 
+  geom_point(aes(y=Enorm2), size=3, color="blue") +
+  geom_point(aes(y=Nnorm2), size=3, color="red") +
+  geom_point(aes(y=Pnorm2), size=3, color="green") +
+  geom_line(aes(y=Enorm2, color='Test'), size=0.8) + 
+  geom_line(aes(y=Nnorm2, color='Negative Control'), size =0.8) + 
+  geom_line(aes(y=Pnorm2, color='Positive Control'), size =0.8) + 
+  dark_mode()+
+  xlim(0,20) +
+  ylim(0,1) +
+  labs(title = 'NavAb Liposome Flux Assay (2uM ACMA)', 
+       x = 'Time(s)', y='Avg Normalized Fluorescence', color='2uM ACMA (K Inside)')
+
+# call plot
+p2 #or print(p1)
+```
+- The spoiler is when you look at the plots, you can tell the increased volatility in signal when Cs is inside relative to K inside and this is likely because Navab-Cs interactions are likely more non-specific making the result with Cs inside less predictable.
+- Another spoiler, within the signal zone (2uM, 3uM, 5uM are currently tested values) the results above are more predictable than not. I will reveal the signal zone at the end which is my opinion because the lower boundary is not well determined. 
+- More in Beamer.
+
+## Enough about the signal zone (Let's talk about noise)
+
+- Out of the signal zone or at least at the boundary of the signal zone (>=) I notice an inversion of some parts of our results from the signal zone and in other cases, extreme unpredictability (especially the lower boundary).
+
+- Upper boundary of signal zone towards the noise zone
+```{r}
+#plotting in the noise zone at >=(20uM-inf) with Cs inside
+p3 = ggplot(navab227_norm2, aes(x=WELLNUM)) + 
+  geom_point(aes(y=E20norm), size=3, color="blue") +
+  geom_point(aes(y=F20norm), size=3, color="red") +
+  geom_point(aes(y=G20norm), size=3, color="green") +
+  geom_line(aes(y=E20norm, color='Test'), size=0.8) + 
+  geom_line(aes(y=F20norm, color='Negative Control'), size =0.8) + 
+  geom_line(aes(y=G20norm, color='Positive Control'), size =0.8) + 
+  dark_mode()+
+  xlim(0,20) +
+  ylim(0,1) +
+  labs(title = 'NavAb Liposome Flux Assay (20uM ACMA)', 
+       x = 'Time(s)', y='Avg Normalized Fluorescence', color='20uM ACMA (Cs Inside)')
+
+# call plot
+p3 #or print(p1)
+```
+
+- Lower boundary of signal zone towards the noise zone
+
+```{r}
+#plotting in the noise zone at <=(1-2) with Cs inside
+p4 = ggplot(navab227_norm2, aes(x=WELLNUM)) + 
+  geom_point(aes(y=E0norm), size=3, color="blue") +
+  geom_point(aes(y=F0norm), size=3, color="red") +
+  geom_point(aes(y=G0norm), size=3, color="green") +
+  geom_line(aes(y=E0norm, color='Test'), size=0.8) + 
+  geom_line(aes(y=F0norm, color='Negative Control'), size =0.8) + 
+  geom_line(aes(y=G0norm, color='Positive Control'), size =0.8) + 
+  dark_mode()+
+  xlim(0,20) +
+  ylim(0,1) +
+  labs(title = 'NavAb Liposome Flux Assay (0.2uM ACMA)', 
+       x = 'Time(s)', y='Avg Normalized Fluorescence', color='0.2uM ACMA (Cs Inside)')
+
+# call plot
+p4 #or print(p1)
+```
+
+## ACMA concentration within the signal zone is predictable
+- Within the signal zone varying ACMA concentration drives similar behavior in the system.
+- We could expect differences but that is not the reality
+
+```{r}
+#plotting in the noise zone at <=(1-2) with Cs inside
+p4 = ggplot(navab227_norm2, aes(x=WELLNUM)) + 
+  geom_point(aes(y=E0norm), size=3, color="blue") +
+  geom_point(aes(y=F0norm), size=3, color="red") +
+  geom_point(aes(y=G0norm), size=3, color="green") +
+  geom_line(aes(y=E0norm, color='Test'), size=0.8) + 
+  geom_line(aes(y=F0norm, color='Negative Control'), size =0.8) + 
+  geom_line(aes(y=G0norm, color='Positive Control'), size =0.8) + 
+  dark_mode()+
+  xlim(0,20) +
+  ylim(0,1) +
+  labs(title = 'NavAb Liposome Flux Assay (0.2uM ACMA)', 
+       x = 'Time(s)', y='Avg Normalized Fluorescence', color='0.2uM ACMA (Cs Inside)')
+
+# call plot
+p4 #or print(p1)
+
+# The driver of control point of this signal noise zones (ACMA)
+# concentrations of ACMA drive signal-noise zones advocating balance
+
+p5 = ggplot(navab221_avgnorm, aes(x=WELLNUM)) + 
+  geom_point(aes(y=T2norm), size=3, color="blue1") +
+  geom_point(aes(y=T3norm), size=3, color="blue2") +
+  geom_point(aes(y=T4norm), size=3, color="blue3") +
+  geom_point(aes(y=T5norm), size=3, color="blue4") +
+
+  geom_line(aes(y=T2norm, color='2uM ACMA'), size=0.8) + 
+  geom_line(aes(y=T3norm, color='3uM ACMA'), size =0.8) + 
+  geom_line(aes(y=T4norm, color='4uM ACMA'), size =0.8) + 
+  geom_line(aes(y=T5norm, color='5uM ACMA'), size =0.8) + 
+  dark_mode()+
+  xlim(0,20) +
+  ylim(0,1) +
+  labs(title = 'NavAb Liposome Flux Assay (for i in ACMA,i+)', 
+       x = 'Time(s)', y='Avg Normalized Fluorescence', color='Signal ACMA uM')
+
+# call plot
+p5 #or print(p1)
+```
+
+## Takebacks
+- Very complex and cerebral project
+- Signal-Noise ratios are important to know when understanding a system
+- A failure to know this prevents good interpretation of results
+- Final spoiler, my opinion is the signal ration is 2<= x >=20
+- I am more certain of the upper boundary than I am of the lower and now that I say that even the upper boundary is not well known.
+- This is very rudimentary coding and I am curious to see a more sophisticated approach from anyone
+- Also the next step is automation of DBF to CVS conversion using R shiny apps.
+- I am very proud of this project and check out my beamer.
+
